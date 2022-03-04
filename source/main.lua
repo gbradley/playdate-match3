@@ -12,11 +12,11 @@ import "CoreLibs/timer"
 import "CoreLibs/ui"
 import "CoreLibs/object"
 
+import "grid"
 
 local gfx <const> = playdate.graphics
 
-local gridView = playdate.ui.gridview.new(24, 24)
-local lastGridSelection = { 1, 1, 1 }
+local grid = Grid()
 
 local turnFocus = { grid = 0, playerTeam = 1, opponentTeam = 2}
 local currentTurnFocus = turnFocus.grid
@@ -33,24 +33,6 @@ teams[turnFocus.opponentTeam] = {
     view = playdate.ui.gridview.new(80, 78),
     lastSelection = { 1, 1, 1 }
 }
-
--- Grid --
-
-function setupGrid()
-
-    gridView:setNumberOfColumns(8)
-    gridView:setNumberOfRows(8)
-    gridView:setCellPadding(2, 2, 2, 2)
-    gridView.changeRowOnColumnWrap = false
-    gridView.changeColumnonRowWrap = false
-    gridView.scrollCellsToCenter = false
-
-    function gridView:drawCell(section, row, column, selected, x, y, width, height)
-        gfx.setLineWidth(ternary(selected, 3, 1))
-        gfx.drawCircleInRect(x, y, width, height)
-    end
-
-end
 
 -- Setup team view
 
@@ -76,7 +58,7 @@ function setupTeam(teamType, alignment)
     
 end
 
-setupGrid()
+grid:setup()
 setupTeam(turnFocus.playerTeam, kTextAlignment.left)
 setupTeam(turnFocus.opponentTeam, kTextAlignment.right)
 
@@ -88,7 +70,7 @@ function playdate.update()
     gfx.fillRect(0, 0, 400, 240);
     gfx.setColor(gfx.kColorBlack)
 
-    gridView:drawInRect(88, 8, 224, 224)
+    grid.view:drawInRect(88, 8, 224, 224)
     teams[turnFocus.playerTeam].view:drawInRect(0, 0, 88, 240)
     teams[turnFocus.opponentTeam].view:drawInRect(400 - 82, 0, 88, 240)
     
@@ -145,28 +127,28 @@ gridInputHandlers = {
     
     leftButtonDown = function()
         local function timerCallback()
-            gridView:selectPreviousColumn(true)
+            grid.view:selectPreviousColumn(true)
         end
         setKeyTimer(playdate.kButtonLeft, timerCallback)
     end,
     
     rightButtonDown = function()
         local function timerCallback()
-            gridView:selectNextColumn(true)
+            grid.view:selectNextColumn(true)
         end
         setKeyTimer(playdate.kButtonRight, timerCallback)
     end,
     
     upButtonDown = function()
         local function timerCallback()
-            gridView:selectPreviousRow(true)
+            grid.view:selectPreviousRow(true)
         end
         setKeyTimer(playdate.kButtonUp, timerCallback)
     end,
     
     downButtonDown = function()
         local function timerCallback()
-            gridView:selectNextRow(true)
+            grid.view:selectNextRow(true)
         end
         setKeyTimer(playdate.kButtonDown, timerCallback)
     end,
@@ -174,8 +156,7 @@ gridInputHandlers = {
     -- Switching from grid to current team
     BButtonDown = function()
         
-        lastGridSelection = table.pack(gridView:getSelection())
-        gridView:setSelection(nil)
+        grid:deselect()
         
         local team = teams[currentTeam]
         team.view:setSelection(table.unpack(team.lastSelection))
@@ -225,7 +206,7 @@ teamInputHandlers = {
         team.lastSelection = table.pack(team.view:getSelection())
         team.view:setSelection(nil)
         
-        gridView:setSelection(table.unpack(lastGridSelection))
+        grid:reselect()
         
         currentTurnFocus = turnFocus.grid
         playdate.inputHandlers.pop()
