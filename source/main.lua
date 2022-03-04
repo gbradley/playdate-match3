@@ -15,7 +15,6 @@ import "CoreLibs/object"
 
 local gfx <const> = playdate.graphics
 
-
 local gridView = playdate.ui.gridview.new(24, 24)
 local lastGridSelection = { 1, 1, 1 }
 
@@ -47,11 +46,7 @@ function setupGrid()
     gridView.scrollCellsToCenter = false
 
     function gridView:drawCell(section, row, column, selected, x, y, width, height)
-        if selected then
-            gfx.setLineWidth(3)
-        else
-            gfx.setLineWidth(1)
-        end
+        gfx.setLineWidth(ternary(selected, 3, 1))
         gfx.drawCircleInRect(x, y, width, height)
     end
 
@@ -73,14 +68,8 @@ function setupTeam(teamType, alignment)
             gfx.setImageDrawMode(gfx.kDrawModeCopy)
         end
         
-        local xOffset = x;
-        if alignment == kTextAlignment.left then
-            xOffset += 3
-        else
-            xOffset -= 3            
-        end
-        
-        gfx.drawTextInRect(team.members[row], xOffset, y + 3, width, height, nil, "...", alignment)
+        local xOffset = ternary(alignment == kTextAlignment.left, 3, -3)
+        gfx.drawTextInRect(team.members[row], x + xOffset, y + 3, width, height, nil, "...", alignment)
     end
     
     team.view:setSelection(team.lastSelection)
@@ -109,17 +98,17 @@ end
 
 -- Helpers
 
+function ternary(condition, yes, no)
+    if condition then return yes else return no end
+end
+
 function switchTeam()
     
     previousTeam = teams[currentTeam]
     previousTeam.lastSelection = table.pack(previousTeam.view:getSelection())
     previousTeam.view:setSelection(nil)
- 
-    if currentTeam == turnFocus.playerTeam then
-        currentTeam = turnFocus.opponentTeam
-    else
-        currentTeam = turnFocus.playerTeam    
-    end
+    
+    currentTeam = ternary(currentTeam == turnFocus.playerTeam, turnFocus.opponentTeam, turnFocus.playerTeam)
     
     teams[currentTeam].view:setSelection(table.unpack(previousTeam.lastSelection))
     currentTurnFocus = currentTeam
