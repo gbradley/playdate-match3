@@ -12,7 +12,8 @@ import "CoreLibs/timer"
 import "CoreLibs/ui"
 import "CoreLibs/object"
 
-import "grid"
+import "Grid/grid"
+import "Team/team"
 
 local gfx <const> = playdate.graphics
 
@@ -23,16 +24,8 @@ local currentTurnFocus = turnFocus.grid
 local currentTeam = turnFocus.playerTeam
 
 local teams = {}
-teams[turnFocus.playerTeam] = {
-    members = { "Frodo", "Sam", "Pippin"},
-    view =  playdate.ui.gridview.new(80, 78),
-    lastSelection = { 1, 1, 1 }
-}
-teams[turnFocus.opponentTeam] = {
-    members = { "Sauron", "WitchKing", "Saruman"},
-    view = playdate.ui.gridview.new(80, 78),
-    lastSelection = { 1, 1, 1 }
-}
+teams[turnFocus.playerTeam] = Team({ "Frodo", "Sam", "Pippin"}, kTextAlignment.left)
+teams[turnFocus.opponentTeam] = Team({ "Sauron", "WitchKing", "Saruman"}, kTextAlignment.right)
 
 -- Setup team view
 
@@ -59,8 +52,8 @@ function setupTeam(teamType, alignment)
 end
 
 grid:setup()
-setupTeam(turnFocus.playerTeam, kTextAlignment.left)
-setupTeam(turnFocus.opponentTeam, kTextAlignment.right)
+teams[turnFocus.playerTeam]:setup()
+teams[turnFocus.opponentTeam]:setup()
 
 -- Update --
 
@@ -75,7 +68,6 @@ function playdate.update()
     teams[turnFocus.opponentTeam].view:drawInRect(400 - 82, 0, 88, 240)
     
     playdate.timer.updateTimers()
-
 end
 
 -- Helpers
@@ -85,14 +77,9 @@ function ternary(condition, yes, no)
 end
 
 function switchTeam()
-    
-    previousTeam = teams[currentTeam]
-    previousTeam.lastSelection = table.pack(previousTeam.view:getSelection())
-    previousTeam.view:setSelection(nil)
-    
+    local previousTeam = teams[currentTeam]
     currentTeam = ternary(currentTeam == turnFocus.playerTeam, turnFocus.opponentTeam, turnFocus.playerTeam)
-    
-    teams[currentTeam].view:setSelection(table.unpack(previousTeam.lastSelection))
+    teams[currentTeam]:switchFrom(previousTeam)
     currentTurnFocus = currentTeam
 end
 
@@ -157,16 +144,13 @@ gridInputHandlers = {
     BButtonDown = function()
         
         grid:deselect()
-        
-        local team = teams[currentTeam]
-        team.view:setSelection(table.unpack(team.lastSelection))
+        teams[currentTeam]:reselect()
         
         currentTurnFocus = currentTeam
         playdate.inputHandlers.pop()
         playdate.inputHandlers.push(teamInputHandlers)
         
     end
-    
 }
 
 teamInputHandlers = {
@@ -202,10 +186,7 @@ teamInputHandlers = {
     -- Switching from current team to grid
     BButtonDown = function()
                 
-        local team = teams[currentTeam]
-        team.lastSelection = table.pack(team.view:getSelection())
-        team.view:setSelection(nil)
-        
+        teams[currentTeam]:deselect()
         grid:reselect()
         
         currentTurnFocus = turnFocus.grid
