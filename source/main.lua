@@ -17,41 +17,17 @@ import "Team/team"
 
 local gfx <const> = playdate.graphics
 
-local grid = Grid()
-
 local turnFocus = { grid = 0, playerTeam = 1, opponentTeam = 2}
 local currentTurnFocus = turnFocus.grid
 local currentTeam = turnFocus.playerTeam
 
-local teams = {}
-teams[turnFocus.playerTeam] = Team({ "Frodo", "Sam", "Pippin"}, kTextAlignment.left)
-teams[turnFocus.opponentTeam] = Team({ "Sauron", "WitchKing", "Saruman"}, kTextAlignment.right)
-
--- Setup team view
-
-function setupTeam(teamType, alignment)
-
-    local team = teams[teamType]
-    team.view:setNumberOfRows(#team.members)
-    team.view:setCellPadding(1, 1, 1, 1)
-    
-    function team.view:drawCell(section, row, column, selected, x, y, width, height)
-        if selected then
-            gfx.fillRoundRect(x, y, width, height, 4)
-            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-            else
-            gfx.setImageDrawMode(gfx.kDrawModeCopy)
-        end
-        
-        local xOffset = ternary(alignment == kTextAlignment.left, 3, -3)
-        gfx.drawTextInRect(team.members[row], x + xOffset, y + 3, width, height, nil, "...", alignment)
-    end
-    
-    team.view:setSelection(team.lastSelection)
-    
-end
-
+local grid = Grid()
 grid:setup()
+
+local teams = {
+    [turnFocus.playerTeam] = Team({ "Frodo", "Sam", "Pippin"}, kTextAlignment.left),
+    [turnFocus.opponentTeam] = Team({ "Sauron", "WitchKing", "Saruman"}, kTextAlignment.right)
+}
 teams[turnFocus.playerTeam]:setup()
 teams[turnFocus.opponentTeam]:setup()
 
