@@ -179,3 +179,167 @@ end
 
 playdate.inputHandlers.push(baseInputHandlers)
 playdate.inputHandlers.push(gridInputHandlers)
+
+local moves = {
+    
+    --1. xoxx
+    { 
+        { 1, 0, 1, 1 }
+    },
+    
+    --2. xxox
+    { 
+        { 1, 1, 0, 1 }
+    },
+    
+    --3. x/o/x/x
+    {
+        { 1 },
+        { 0 },
+        { 1 },
+        { 1 }
+    },
+    
+    --4. x/x/o/x
+    {
+        { 1 },
+        { 1 },
+        { 0 },
+        { 1 }
+    },
+    
+    --5. ox/xo/ox
+    {
+        { 0, 1 },
+        { 1, 0 },
+        { 0, 1 }
+    },
+    
+    --6. xo/ox/xo
+    {
+        { 1, 0 },
+        { 0, 1 },
+        { 1, 0 }
+    },
+    
+    --7.oxo/xox
+    {
+        { 0, 1, 0 },
+        { 1, 0, 1 }
+    },
+    
+    --8. xox/oxo
+    {
+        { 1, 0, 1 },
+        { 0, 1, 0 }
+    },
+    
+    --9. xxo/oox
+    {
+        { 1, 1, 0 },
+        { 0, 0, 1 }
+    },
+    
+    --10. oox/xxo
+    {
+        { 0, 0, 1 },
+        { 1, 1, 0 }
+    },
+    
+    --11. ox/ox/xo
+    {
+        { 0, 1 },
+        { 0, 1 },
+        { 1, 0 }
+    },
+    
+    --12. xo/xo/xo
+    {
+        { 1, 0 },
+        { 1, 0 },
+        { 0, 1 }
+    },
+    
+    --13. xoo/oxx
+    {
+        { 1, 0, 0 },
+        { 0, 1, 1 }
+    },
+        
+    --14. oxx/xoo
+    {
+        { 0, 1, 1 },
+        { 1, 0, 0 }
+    },
+    
+    --15. ox/xo/xo
+    {
+        { 0, 1 },
+        { 1, 0 },
+        { 1, 0 }
+    },
+    
+    --16. xo/ox/ox
+    {
+        { 1, 0 },
+        { 0, 1 },
+        { 0, 1 }
+    }    
+}
+
+function findMatch(index, moves, gridState)
+    
+    local move = moves[index]
+    
+    for row = 1, 8 do
+        for col = 1, 8 do
+    
+            -- Check the move bounds don't exceed the grid bounds.
+            if col + #move <= 9 and row + #move[1] <= 9 then
+                if checkMatchAtPosition(col, row, move, gridState) then
+                    print("move " .. index .. " at " .. col .. ", " ..row)
+                end
+            end
+            
+        end
+    end
+end
+
+function checkMatchAtPosition(col, row, move, gridState)
+    
+    local type = nil
+    
+    for i = 1, #move do
+        for j = 1, #move[1] do
+            
+            -- IF the move contains "1" at this position we need to compare the other positions.
+            if (move[i][j] == 1) then
+                
+                local currentType = gridState[col + i - 1][row + j - 1]
+                
+                if type == nil then
+                    type = currentType       
+                elseif currentType ~= type then
+                    return false
+                end
+            end
+        end
+    end
+    
+    return true
+end
+
+local gridState = {
+    { 1, 2, 3, 4, 5, 6, 7, 8 },
+    { 2, 3, 4, 5, 6, 7, 8, 1 },
+    { 3, 4, 5, 6, 7, 8, 1, 1 },
+    { 4, 5, 6, 7, 8, 1, 2, 3 },
+    { 5, 6, 7, 8, 1, 2, 3, 1 },
+    { 6, 7, 8, 1, 2, 3, 4, 5 },
+    { 7, 8, 1, 2, 3, 4, 5, 6 },
+    { 8, 1, 2, 3, 4, 5, 6, 7 }
+}
+
+for index = 1, #moves do
+   findMatch(index, moves, gridState) 
+end
