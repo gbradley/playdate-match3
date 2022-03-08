@@ -180,111 +180,261 @@ end
 playdate.inputHandlers.push(baseInputHandlers)
 playdate.inputHandlers.push(gridInputHandlers)
 
-local moves = {
+local potentialMatch3s = {
     
     --1. xoxx
     { 
-        { 1, 0, 1, 1 }
+        pattern = { { 1, 0, 1, 1 } },
+        from = { 1, 1 },
+        to = { 1, 2 }
     },
     
     --2. xxox
     { 
-        { 1, 1, 0, 1 }
+        pattern = { { 1, 1, 0, 1 } },
+        from = { 1, 4 },
+        to = { 1, 3 }
     },
     
     --3. x/o/x/x
     {
-        { 1 },
-        { 0 },
-        { 1 },
-        { 1 }
+        pattern = {
+            { 1 },
+            { 0 },
+            { 1 },
+            { 1 }
+        },
+        from = { 1, 1 },
+        to = { 2, 1 }
     },
     
     --4. x/x/o/x
     {
-        { 1 },
-        { 1 },
-        { 0 },
-        { 1 }
+        pattern = {
+            { 1 },
+            { 1 },
+            { 0 },
+            { 1 }
+        },
+        from = { 4, 1 },
+        to = { 3, 1 }
     },
     
     --5. ox/xo/ox
     {
-        { 0, 1 },
-        { 1, 0 },
-        { 0, 1 }
+        pattern = {
+            { 0, 1 },
+            { 1, 0 },
+            { 0, 1 }
+        },
+        from = { 2, 1 },
+        to = { 2, 2 }
     },
     
     --6. xo/ox/xo
     {
-        { 1, 0 },
-        { 0, 1 },
-        { 1, 0 }
+        pattern = {
+            { 1, 0 },
+            { 0, 1 },
+            { 1, 0 }
+        },
+        from = { 2, 2 },
+        to = { 2, 1 }
     },
     
     --7.oxo/xox
     {
-        { 0, 1, 0 },
-        { 1, 0, 1 }
+        pattern = {
+            { 0, 1, 0 },
+            { 1, 0, 1 }
+        },
+        from = { 1, 2 },
+        to = { 2, 2 }
     },
     
     --8. xox/oxo
     {
-        { 1, 0, 1 },
-        { 0, 1, 0 }
+        pattern = {
+            { 1, 0, 1 },
+            { 0, 1, 0 }
+        },
+        from = { 2, 2 },
+        to = { 2, 1 }
     },
     
     --9. xxo/oox
     {
-        { 1, 1, 0 },
-        { 0, 0, 1 }
+        pattern = {
+            { 1, 1, 0 },
+            { 0, 0, 1 }
+        },
+        from = { 2, 3 },
+        to = { 1, 3 }
     },
     
     --10. oox/xxo
     {
-        { 0, 0, 1 },
-        { 1, 1, 0 }
+        pattern = {
+            { 0, 0, 1 },
+            { 1, 1, 0 }
+        },
+        from = { 1, 3 },
+        to = { 1, 3 }
     },
     
     --11. ox/ox/xo
     {
-        { 0, 1 },
-        { 0, 1 },
-        { 1, 0 }
+        pattern = {
+            { 0, 1 },
+            { 0, 1 },
+            { 1, 0 }
+        },
+        from = { 3, 1 },
+        to = { 3, 2 }
     },
     
     --12. xo/xo/xo
     {
-        { 1, 0 },
-        { 1, 0 },
-        { 0, 1 }
+        pattern = {
+            { 1, 0 },
+            { 1, 0 },
+            { 0, 1 }
+        },
+        from = { 3, 2 },
+        to = { 3, 1 }
     },
     
     --13. xoo/oxx
     {
-        { 1, 0, 0 },
-        { 0, 1, 1 }
+        pattern = {
+            { 1, 0, 0 },
+            { 0, 1, 1 }
+        },
+        from = { 1, 1 },
+        to = { 2, 1 }
     },
         
     --14. oxx/xoo
     {
-        { 0, 1, 1 },
-        { 1, 0, 0 }
+        pattern = {
+            { 0, 1, 1 },
+            { 1, 0, 0 }
+        },
+        from = { 2, 1 },
+        to = { 1, 1 }
     },
     
     --15. ox/xo/xo
     {
-        { 0, 1 },
-        { 1, 0 },
-        { 1, 0 }
+        pattern = {
+            { 0, 1 },
+            { 1, 0 },
+            { 1, 0 }
+        },
+        from = { 1, 2 },
+        to = { 1, 1 }
     },
     
     --16. xo/ox/ox
     {
-        { 1, 0 },
-        { 0, 1 },
-        { 0, 1 }
-    }    
+        pattern = {
+            { 1, 0 },
+            { 0, 1 },
+            { 0, 1 }
+        },
+        from = { 1, 1 },
+        to = { 1, 2 }
+    }
+}
+
+local potentialMatch4s = {
+    --1. xxox/ooxo
+    {
+        pattern = {
+            { 1, 1, 0, 1 },
+            { 0, 0, 1, 0 }
+        },
+        from = { 2, 3 },
+        to = { 1, 3 }
+    },
+    
+    --2. ox/ox/xo/ox
+    {
+        pattern = {
+            { 0, 1 },
+            { 0, 1 },
+            { 1, 0 },
+            { 0, 1 }
+        },
+        from = { 3, 1 },
+        to = { 3, 2 }
+    },
+    
+    --3. xxox/ooxo
+    {
+        pattern = {
+            { 0, 1, 0, 0 },
+            { 1, 0, 1, 1 }
+        },
+        from = { 1, 2 },
+        to = { 2, 2 }
+    },
+        
+    --4. xo/ox/xo/xo
+    {
+        pattern = {
+            { 1, 0 },
+            { 0, 1 },
+            { 1, 0 },
+            { 1, 0 }
+        },
+        from = { 2, 2 },
+        to = { 2, 1 }
+    },
+    
+    --5. xxox/ooxo
+    {
+        pattern = {
+            { 0, 0, 1, 0 },
+            { 1, 1, 0, 1 }
+        },
+        from = { 1, 3 },
+        to = { 2, 3 }
+    },
+    
+    --6. xo/xo/ox/xo
+    {
+        pattern = {
+            { 1, 0 },
+            { 1, 0 },
+            { 0, 1 },
+            { 1, 0 }
+        },
+        from = { 3, 2 },
+        to = { 3, 1 }
+    },
+    
+    --7. xxox/ooxo
+    {
+        pattern = {
+            { 1, 0, 1, 1 },
+            { 0, 1, 0, 0 }
+        },
+        from = { 2, 2 },
+        to = { 1, 2 }
+    },
+        
+    --8. ox/xo/ox/ox
+    {
+        pattern = {
+            { 0, 1 },
+            { 1, 0 },
+            { 0, 1 },
+            { 0, 1 }
+        },
+        from = { 2, 1 },
+        to = { 2, 2 }
+    }
 }
 
 function findMatch(index, moves, gridState)
@@ -295,12 +445,23 @@ function findMatch(index, moves, gridState)
         for col = 1, 8 do
     
             -- Check the move bounds don't exceed the grid bounds.
-            if col + #move <= 9 and row + #move[1] <= 9 then
+            if col + #move.pattern <= 9 and row + #move.pattern[1] <= 9 then
                 if checkMatchAtPosition(col, row, move, gridState) then
-                    print("move " .. index .. " at " .. col .. ", " ..row)
+                    --print("move " .. index .. " at " .. col .. ", " ..row)
+                    
+                    -- Translate the local from/to into grid indeces.
+                    local from = { col + move.from[1] - 1, row + move.from[2] - 1 }
+                    local to = { col + move.to[1] - 1, row + move.to[2] - 1 }
+                    
+                    -- Get the type at the "from" position
+                    local tile = gridState[from[1]][from[2]]
+                
+                    -- For now all tiles have an equal score
+                    local score = 1
+                
+                    return from, to, tile, score
                 end
             end
-            
         end
     end
 end
@@ -309,11 +470,11 @@ function checkMatchAtPosition(col, row, move, gridState)
     
     local type = nil
     
-    for i = 1, #move do
-        for j = 1, #move[1] do
+    for i = 1, #move.pattern do
+        for j = 1, #move.pattern[1] do
             
-            -- IF the move contains "1" at this position we need to compare the other positions.
-            if (move[i][j] == 1) then
+            -- If the move contains "1" at this position we need to compare the other positions.
+            if (move.pattern[i][j] == 1) then
                 
                 local currentType = gridState[col + i - 1][row + j - 1]
                 
@@ -329,17 +490,62 @@ function checkMatchAtPosition(col, row, move, gridState)
     return true
 end
 
+function findBestMove(potentialMoves, tileCapacity, gridState)
+    
+local possibleMoves = {}
+    
+for index = 1, #potentialMatch4s do
+    local from, to, tile, score = findMatch(index, potentialMoves, gridState) 
+    if from then
+        possibleMoves[#possibleMoves + 1] = {from = from, to = to, tile = tile, score = score }
+    end
+end
+
+table.sort(possibleMoves, function(a, b)
+    if tileCapacity[a.tile] > tileCapacity[b.tile] then return 1 end
+    if tileCapacity[a.tile] < tileCapacity[b.tile] then return -1 end
+    return 0
+end)
+
+printTable(possibleMoves)
+
+end
+
+
+
 local gridState = {
     { 1, 2, 3, 4, 5, 6, 7, 8 },
     { 2, 3, 4, 5, 6, 7, 8, 1 },
-    { 3, 4, 5, 6, 7, 8, 1, 1 },
-    { 4, 5, 6, 7, 8, 1, 2, 3 },
-    { 5, 6, 7, 8, 1, 2, 3, 1 },
-    { 6, 7, 8, 1, 2, 3, 4, 5 },
-    { 7, 8, 1, 2, 3, 4, 5, 6 },
-    { 8, 1, 2, 3, 4, 5, 6, 7 }
+    { 3, 4, 5, 6, 7, 8, 4, 1 },
+    { 4, 5, 6, 7, 8, 5, 1, 3 },
+    { 5, 1, 6, 8, 1, 2, 3, 1 },
+    { 6, 6, 8, 6, 2, 3, 4, 5 },
+    { 7, 8, 1, 2, 3, 8, 5, 6 },
+    { 8, 1, 2, 3, 8, 5, 8, 8 }
 }
 
-for index = 1, #moves do
-   findMatch(index, moves, gridState) 
-end
+local tiles = {
+    circle = 1,
+    square = 2,
+    triangle = 3,
+    hexagon = 4,
+    moon = 5,
+    arrow = 6,
+    cross = 7,
+    skull = 8   
+}
+
+-- How many tiles of each kind the opponent team need. We arbitrarily set skulls to a large number to always prioritize them.
+local tileCapacity = {
+    [tiles.circle] = 4,
+    [tiles.square] = 0,
+    [tiles.triangle] = 0,
+    [tiles.hexagon] = 2,
+    [tiles.moon] = 5,
+    [tiles.arrow] = 10,
+    [tiles.cross] = 0,
+    [tiles.skull] = 10000
+}
+
+
+findBestMove(potentialMatch4s, tileCapacity, gridState)
